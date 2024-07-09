@@ -1,0 +1,64 @@
+﻿<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style type="text/css">
+        body {
+            padding: 20px
+        }
+    </style>
+    <link rel="stylesheet" href="index.css">
+
+    <script src="/htmx.js"></script>
+    <script type="text/javascript">
+
+    </script>
+</head>
+
+<body>
+    <button hx-get="/api/index.aardio" 
+        hx-swap="innerHTML" 
+        hx-trigger="click" 
+        hx-target="#info-div"  
+        hx-vals='javascript:{myVal: "\
+        有以下几种方法指定请求参数：\
+        1、在这里直接指定 JSON 作为请求参数。\
+        2、使用 javascript: 返回一个 JS 对象作为请求参数。\
+        3、如果当前节点是 input，则 name 指定参数名。\
+        4、如果当前节点是 form ，则表单内部所有控件的数据作为请求参数。"}'  
+        hx-indicator="#indicator" >
+        点这里发送 GET 请求
+    </button><br>
+
+    <!-- 
+        上面的 hx-indicator="#indicator" 用 CSS 选择器指定了提交时显示的节点，
+        由 index.css 中的 .htmx-request.htmx-indicator 样式指定了提交时切换为显示样式。
+        注意 aardio 后端是多线程的，执行耗时操作不会阻塞网页前端。
+    -->
+    <img id="indicator" class="htmx-indicator" src="/images/loading.gif"/>
+
+    <div id="info-div">
+        使用 htmx 每个 HTML 节点都可以发送 HTTP 请求，<br>
+        每个 HTML 节点都可以单独刷新显示服务端返回的 HTML。<br>
+        <br> 
+        不要为了不写 JavaScript 而不写 JavaScript：<br>  
+        <button onclick="aardio.getFile().then( 
+            v=> { if(v) document.getElementById('info-div').innerText = v; }
+            )">
+            JavaScript 直接调用 aardio 函数打开本地文件</button>
+    </div><br>
+
+    <input type="text" 
+        name="q" 
+        hx-post="/api/index.aardio" 
+        hx-trigger="keyup changed delay:500ms"
+        hx-target="#search-results" 
+        placeholder="请输入关键词发送 POST 请求 ..."
+        style="width:300px"><br>
+    <div id="search-results"></div>
+    <br>
+    <a href="https://mp.weixin.qq.com/s/UTiu5gXJ7j-hKnewhhF5sA" target="_blank">htmx.js 快速入门</a>
+</body>
+
+</html>

@@ -1,0 +1,26 @@
+import win.ui;
+/*DSG{{*/
+var winform = win.form(text="url";right=749;bottom=47;border="thin";parent=...;)
+winform.add(
+addressUrl={cls="edit";left=7;top=6;right=744;bottom=43;ah=1;autohscroll=false;autovscroll=false;aw=1;bgcolor=13361867;db=1;dl=1;dr=1;dt=1;font=LOGFONT(h=-19);z=1;};
+
+)
+/*}}*/
+
+import appComponents;
+
+winform.addressUrl.top = 0;
+winform.addressUrl.left = 0;
+winform.addressUrl.width = winform.width;
+winform.addressUrl.height = winform.height;
+
+winform.addressUrl.onOk = function(){
+	appComponents.myTimer.disable();
+	appComponents.myWebView.go(winform.addressUrl.text);
+	appComponents.myCustom.show(false);
+	return true; 	
+}
+
+winform.show();
+win.loopMessage();
+return winform;

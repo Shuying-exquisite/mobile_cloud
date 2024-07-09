@@ -1,0 +1,10 @@
+﻿
+namespace userInfo{
+	userName = "";
+	winname  ="移动云手机";
+	webWidth = 400;
+	webHeight = 600;
+	loginWinIdx = 0;
+	timerStatus = false;
+	topTimerStatus = false;
+}

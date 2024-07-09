@@ -1,0 +1,391 @@
+import win.ui;
+import web.view;
+import fsys.dlg;
+import userInfo;
+import appConfig;
+import console;
+import key.hotkey;
+import appComponents;
+/*DSG{{*/
+webForm = win.form(text=userInfo.winname;left=100;top=100;right=413;bottom=413;parent=...;)
+webForm.add(
+custom={cls="custom";text="自定义控件";left=4;top=5;right=312;bottom=35;aw=1;dl=1;dr=1;dt=1;hide=1;z=1;};
+
+)
+/*}}*/
+
+webForm.custom.oncommand = function(id,event){
+	
+}
+
+
+
+appComponents.myCustom = webForm.custom;
+
+// 定义窗口大小
+webForm.width = userInfo.webWidth;
+webForm.height = userInfo.webHeight;
+
+// 自定义控件
+webForm.custom.width = webForm.width - 20;
+webForm.custom.left = 0;
+var addressForm = webForm.custom.loadForm("/forms/address.aardio");
+addressForm.show();
+webForm.reghotkey(
+    function(id, mod, vk) {
+        webForm.custom.show(!win.isVisible(webForm.custom.hwnd));
+    }, 2, 85
+);
+
+console.log("正在获取帐号缓存数据，当前窗口索引："++(tostring(userInfo.loginWinIdx)));
+
+// 注册热键 ctrl + (1~9)
+var keyMap = {
+    49, 50, 51, 52, 53, 54, 55, 56, 57
+};
+webForm.reghotkey(
+    function(id, mod, vk) {
+        webForm.show(!win.isVisible(webForm.hwnd));
+        win.setForeground(webForm.hwnd);
+    }, 2, keyMap[userInfo.loginWinIdx] and keyMap[userInfo.loginWinIdx] or 49
+);
+
+// 窗口显示隐藏事件
+webForm.beforeShowWindow = function(shown, status) {
+    appConfig.windowShown = shown;
+}
+
+//下面创建托盘图标
+import win.util.tray;
+webForm.tray = win.util.tray(webForm)
+webForm.tray.tip = "移动云手机" //设置鼠标提示 
+
+webForm.onMinimize = function(lParam) {
+    webForm.tray = win.util.tray(webForm);
+    webForm.show(false); //隐藏窗口
+    return true; //阻击默认消息传递,取消最小化过程
+}
+webForm.onTrayMessage = {
+	[0x205 /*_WM_RBUTTONUP*/ ] = function(wParam) {
+        //弹出托盘菜单以前,一定要前置主窗口中,避免不点击菜单不会消失，父窗口隐藏也要这样做
+        win.setForeground(webForm.hwnd);
+        /*
+        下面创建托盘弹出菜单。
+        如果程序要开机启动到托盘，最好在这里创建菜单，在用户点击前不要创建菜单，
+        避免系统启动时 DPI 缩放前创建的菜单字体偏小（出现这情况的机率很小）。
+        如果不想重复创建菜单最好写到一个库里，然后在这里 import 即可避免上述问题。
+        */
+        import win.ui.menu;
+        webForm.popmenu = win.ui.popmenu(webForm); //创建弹出菜单
+        webForm.popmenu.add(appConfig.windowShown ? '&● 显示' : '&   显示', function(id) {
+            //在下面输入菜单响应代码
+            if (!appConfig.windowShown) {
+                webForm.show();
+            }
+        });
+        webForm.popmenu.add(!appConfig.windowShown ? '&● 隐藏' : '&   隐藏', function(id) {
+            //在下面输入菜单响应代码
+            if (appConfig.windowShown) {
+                webForm.show(false);
+            }
+        });
+        webForm.popmenu.add(); //分隔线
+        webForm.popmenu.add('&退出', function(id) {
+            webForm.tray.delete();
+            webForm.close();
+            win.quitMessage();
+        })
+        webForm.popmenu.popup();
+        webForm.popmenu.close();
+    };
+	[0x202 /*_WM_LBUTTONUP*/ ] = function(wParam) {
+        
+    };
+	[0x203 /*_WM_LBUTTONDBLCLK*/ ] = function(wParam) {
+        
+    };
+	[0x404 /*_PARAM_DESTROY*/ ] = function(wParam) {
+        
+    };
+	[0x405 /*_PARAM_CLICKED*/ ] = function(wParam) {
+        
+    };
+}
+
+// 定义用户数据目录
+var userDataDir = appConfig.appRootPath++userInfo.userName;
+// 创建webview
+appComponents.myWebView = web.view(webForm, userDataDir);
+// 禁用F12
+appComponents.myWebView.enableDevTools(false);
+// 启用状态栏
+appComponents.myWebView.enableStatusBar(true);
+// 禁用右键菜单
+appComponents.myWebView.enableDefaultContextMenus(false);
+
+appComponents.myWebView.external = {
+    getFile = function() {
+        return fsys.dlg.open();
+    }
+}
+
+// 跳转地址
+appComponents.myWebView.go("https://cloudphoneh5.buy.139.com");
+
+// 定时查验是否到期
+import string.keywords;
+searchKeyWords = function(webView, selector, keyWords) {
+    var keywords = string.keywords(keyWords, 936);
+    var searchDom = webView.cdpWaitQuery(selector);
+    if (searchDom && searchDom.nodeId > 0) {
+        var htmlText = webView.cdp("DOM.getOuterHTML", {
+            nodeId = searchDom.nodeId;
+        });
+        if (htmlText) {
+            data = string.fromto(htmlText.outerHTML, 65001, 936);
+            var lines = keywords.anyMatchLines(data);
+            return #lines;
+        }
+    }
+    return 0;
+}
+import win.timer
+appComponents.runTimer = win.timer(webForm);
+appComponents.stopTimer = win.timer(webForm);
+// 间隔1秒
+appComponents.runTimer.setInterval(1000);
+appComponents.stopTimer.setInterval(1000);
+// 定时器事件
+appComponents.runTimer.onTimer = function(hwnd, msg, id, tick) {
+    // 断线重连
+    if (searchKeyWords(appComponents.myWebView, ".van-dialog__confirm", '重连') > 0) {
+        appComponents.myWebView.waitEle(".van-dialog__confirm", "this.click()");
+    }
+    // 超时重连
+    if (searchKeyWords(appComponents.myWebView, ".van-dialog__confirm", '进入') > 0) {
+        appComponents.myWebView.waitEle(".van-dialog__confirm", "this.click()");
+    }
+    if (searchKeyWords(appComponents.myWebView, ".unlocked", '进入') > 0) {
+        appComponents.myWebView.waitEle(".unlocked", "this.click()");
+    }
+    // 进入云机
+    if (searchKeyWords(appComponents.myWebView, ".enter-intance", '进入云机') > 0) {
+        appComponents.myWebView.waitEle(".enter-intance", "this.click()");
+    }
+    
+}
+appComponents.stopTimer.onTimer = function(hwnd, msg, id, tick) {
+    // 到期检测
+    var searchInput = appComponents.myWebView.cdpWaitQuery("#tabbar");
+    if (searchInput && searchInput.nodeId > 0) {
+        appComponents.stopTimer.disable();
+        userInfo.topTimerStatus = true;
+        webForm.tray.pop('帐号 '++userInfo.userName++' 已退出云手机，窗口索引：'++userInfo.loginWinIdx, "提示");
+    }
+    
+    // 被下线
+    if (searchKeyWords(appComponents.myWebView, ".van-dialog__confirm", '知道了') > 0) {
+        appComponents.stopTimer.disable();
+        userInfo.topTimerStatus = true;
+        appComponents.myWebView.waitEle(".van-dialog__confirm", "this.click()");
+        webForm.tray.pop('帐号 '++userInfo.userName++' 时间已到期，窗口索引：'++userInfo.loginWinIdx, "提示");
+    }
+    
+}
+
+// 修改页面鼠标样式
+var cur = /*
+	function changeCur() {
+		var style = document.createElement('style');
+		style.type = 'text/css';
+		style.innerHTML = '*{cursor:url("https://fs-im-kefu.7moor-fs1.com/ly/4d2c3f00-7d4c-11e5-af15-41bf63ae4ea0/1715189790852/Dotter.cur"),default;}';
+		document.head.appendChild(style);
+	}
+	changeCur();
+*/;
+appComponents.myWebView.doScript(cur);
+if (!userInfo.timerStatus) {
+    appComponents.runTimer.disable();
+    appComponents.runTimer.enable();
+    userInfo.timerStatus = true;
+}
+if (!userInfo.topTimerStatus) {
+    appComponents.stopTimer.disable();
+    appComponents.stopTimer.enable();
+    userInfo.topTimerStatus = true;
+}
+appComponents.myWebView.onDocumentInit = function(url) {
+    appComponents.myWebView.doScript(cur);
+    
+    if (!userInfo.topTimerStatus) {
+        appComponents.stopTimer.disable();
+        appComponents.stopTimer.enable();
+        userInfo.topTimerStatus = true;
+    }
+    
+    if (!userInfo.timerStatus) {
+        // 先禁用再启用
+        appComponents.runTimer.disable();
+        appComponents.runTimer.enable();
+        userInfo.timerStatus = true;
+    }
+}
+
+// 创建主菜单
+var menu = win.ui.menu(webForm);
+menu.add('云手机首页', function(id) {
+    appComponents.myWebView.go("https://cloudphoneh5.buy.139.com");
+})
+menu.add('爱玩辅助官网', function(id) {
+    appComponents.myWebView.go("http://cocfz.com/");
+})
+menu.add('云朵代挂', function(id) {
+    appComponents.myWebView.go("https://shuyingydyp.streamlit.app/");
+})
+
+
+menu.add('帮助', function(id) {
+	
+var url = /*
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>操作文档（软件发布时间7月9号）</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        p {
+            margin-bottom: 10px;
+        }
+        ul, ol {
+            margin: 20px 0;
+            padding-left: 20px;
+        }
+        code {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            overflow: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        a {
+            color: #007BFF;
+        }
+    </style>
+</head>
+<body>
+
+<h1>基于移动云手机开发的部落冲突专属版操作文档（软件发布时间7月9号）</h1>
+
+<h2>简介</h2>
+<p>由于移动云手机挂机长时间会自动休眠，以及一个浏览器只能挂一个移动云手机账号等问题，2024年6月18日以后一个版本的移动云手机一个月赠送7天免费使用天数（共有2个版本：专业版和极致版）一共14天使用天数。开发的移动云手机.exe，具有低运存的特点：可在2核2G的2016 Windowsserver服务器进行6开，也可以在电脑上进行挂机操作，具有防止休眠的功能。</p>
+
+<h2>步骤一：领取免费云手机</h2>
+<ul>
+    <li>云手机领取地址，也就是本软件的登录界面，登录账号领取</li>
+</ul>
+
+<h2>步骤二：初始化配置云手机</h2>
+<p>打开云手机执行如下操作：</p>
+<ul>
+    <li>在云手机的浏览器中打开链接，安装云手机root分辨率.apk(作用：给云手机提供root功能，修改分辨率；及提供脚本运行环境)</li>
+</ul>
+<pre><code>用的蓝奏云https://shuyingyang.lanzn.com/ivvov23xhd5e密码:f5b9</code></pre>
+
+<ul>
+    <li>在云手机的浏览器中打开爱玩辅助官网下载正版爱玩辅助；去应用商店下载部落冲突；如果是微信账号登陆需要下载上号神器，QQ账号登陆直接去应用商店下载QQ</li>
+</ul>
+<pre><code>爱玩辅助官网http://cocfz.com</code></pre>
+<pre><code>爱玩备用入口http://awcoc.com</code></pre>
+<h2>步骤三：运行</h2>
+<p>执行以下操作：</p>
+<ul>
+    <li>打开云手机root分辨率.apk，先点击root按钮待ok跳出再点击修改分辨率，将其保留在后台运行</li>
+</ul>
+<ul>
+    <li>打开云手机上的部落冲突登录账号</li>
+</ul>
+<ul>
+    <li>打开爱玩辅助（这个版本的脚本叫QQ空间），进行相关配置好后，输入启动码就能开始运行</li>
+</ul>
+
+<h2>常见问题</h2>
+<p>以下是一些常见问题及其解决方案：</p>
+<dl>
+    <dt>问题1：</dt>
+    <dd>遇到问题提交邮箱（软件刚发布有空就看）。</dd>
+    <dt>问题2：</dt>
+    <dd>邮箱：shuyingyangaaaa@gmail.com</dd>
+</dl>
+
+<h2>附录</h2>
+<p>更多信息，请参考以下链接：</p>
+<ul>
+    <li><a href="https://github.com/Shuying-exquisite/mobile_cloud">Github项目文档</a></li>
+</ul>
+
+</body>
+</html>
+*/
+
+    appComponents.myWebView.html=url;
+})
+
+/*
+menu.add('免费领周卡', function(id) {
+    appComponents.myWebView.go("https://cpactiv.buy.139.com/#/fourthQuarter/getCloudPhone?code=JXU7NQNKCWM&fromHelp=true&channelSrc=Q4-help");
+})
+*/
+/*
+menu.add('检查更新', function(id) {
+    var updateForm = webForm.loadForm("/forms/update.aardio");
+    updateForm.show(true);
+})
+*/
+/*
+menu.add('ChatGPT', function(id) {
+    appComponents.myWebView.go("https://chat.sharedchat.fun/");
+})
+*/
+
+// 启用自动缩放
+webForm.enableDpiScaling();
+webForm.show(1 /*_SW_NORMAL*/ );
+// 关闭控制台
+console.close();
+
+// 窗口关闭后退出程序
+webForm.onClose = function(hwnd, message, wParam, lParam) {
+    win.quitMessage();
+}
+// 窗口销毁后退出程序
+webForm.onDestroy = function() {
+    win.quitMessage();
+}
+
+return webForm;

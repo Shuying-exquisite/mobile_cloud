@@ -1,0 +1,71 @@
+import win.ui;
+import web.view;
+/*DSG{{*/
+var mainForm = win.form(text="移动云手机";right=400;bottom=600;)
+mainForm.add(
+custom={cls="custom";left=0;top=20;right=400;bottom=600;z=1;};
+)
+/*}}*/
+
+import win.util.tray;
+var tray = win.util.tray(mainForm,"~\extensions\res\app.ico") //创建托盘图标，如果不能显示图标，可能是图标问题，要复合图标
+tray.message = 0x400+9981/*_WM_TRAYMESSAGE*/
+tray.tip = "移动云手机" //设置鼠标提示  
+
+mainForm.onClose = function(hwnd,message,wParam,lParam){
+    tray.delete(); //关闭窗口同时删掉托盘，避免关闭窗口后要鼠标移到托盘图标才消失
+}
+
+var cachePath = "C:\Users\Lenovo\Desktop\移动云手机";
+var wb = web.view(mainForm.custom,cachePath);
+
+   
+wb.go("https://cloud.139.com/?channelSrc=02047#/cloudphone");
+
+//下面是添加托盘右键菜单
+import win.ui.menu;
+mainForm.popmenu=win.ui.popmenu(mainForm);
+mainForm.popmenu.add('打开',function(id){ //添加了一个打开主界面的菜单
+    mainForm.show(); 
+})
+mainForm.popmenu.add('退出',function(id){ //添加了一个退出程序的菜单
+   mainForm.close()
+})
+
+//下面是获取鼠标消息弹出上面的右键菜单
+import mouse;
+mainForm.wndproc = function(hwnd,message,wparam,lparam){
+    select(message) {//判断消息类型
+        case( 0x400+9981/*_WM_TRAYMESSAGE*/ ) { //托盘图标消息
+              
+            if(lparam = 0x203/*_WM_LBUTTONDBLCLK)*/){  //鼠标双击
+                mainForm.show(true);
+            }
+            elseif(lparam =0x205/*_WM_RBUTTONUP*/){ //鼠标右键
+                    x,y = mouse.getPos();
+                            win.setForeground(mainForm.hwnd)
+                            mainForm.popmenu.popup(x,y,true)
+            }  
+        } 
+        case( 0x112/*_WM_SYSCOMMAND*/ ){ //系统命令消息
+            if( wparam == 0xF020/*_SC_MINIMIZE*/ ){ //用户点击了最小化按钮
+                mainForm.show(false); //隐藏窗口
+                return true;//阻击默认消息传递，取消最小化过程
+              } 
+        }  
+     } 
+} 
+
+// 添加热键 Ctrl+1
+var a = 0;
+mainForm.reghotkey(function(id, mod, vk) {
+    if (a % 2 == 0) {
+        mainForm.show(false); // 隐藏窗口
+    } else {
+        mainForm.show(true); // 显示窗口
+    }
+    a = a + 1;
+},0x2/*_MOD_CONTROL*/,'1'#)
+mainForm.show() 
+win.loopMessage();
+

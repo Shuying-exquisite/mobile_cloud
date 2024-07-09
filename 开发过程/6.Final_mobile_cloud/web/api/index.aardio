@@ -1,0 +1,20 @@
+<?
+if(!response) error("大哥这是网页后端，要通过网页请求才能运行")
+
+response.headers["Cache-Control"] = "no-cache,must-revalidate,no-store";
+response.headers["Pragma"] = "no-cache";
+?><span>
+<?
+
+if(request.method=="GET"){
+	
+	//这是多线程后端，这里等 2 秒，网页会显示加载动画
+	sleep(2000);
+	
+	response.write( time() )	
+}
+elseif(request.method=="POST"){
+	response.write( "aardio 接收到的关键词是："+ request.post["q"] )	
+}
+?>
+</span>

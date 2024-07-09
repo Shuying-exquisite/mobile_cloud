@@ -1,0 +1,25 @@
+import win.ui;
+import win.ui.atom;
+/*DSG{{*/
+mainForm = win.form(text="移动云手机";right=299;bottom=149;max=false;min=false;)
+mainForm.add()
+/*}}*/
+
+import web.view;
+import console;
+import fsys.update.simpleMain;
+import appConfig;
+/*
+appConfig.appRootPath = fsys.getCurDir();
+
+if(fsys.update.simpleMain(
+	"移动云手机",
+	"http://cdn.617kan.cn/update-files/version.txt",
+	appConfig.appRootPath ++ "/data")
+){
+	return 0; //必须退出 main.aardio 以启动更新
+}*/
+
+var loginForm = mainForm.loadForm("/forms/login.aardio");
+
+win.loopMessage();

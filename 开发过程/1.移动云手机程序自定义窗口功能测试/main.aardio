@@ -1,0 +1,54 @@
+import win.ui;
+import web.view;
+//窗口1
+/*DSG{{*/
+var inputForm = win.form(text="设置";right=300;bottom=300;)
+inputForm.add(
+bossKeyInput={cls="edit";text=" 1 ";left=125;top=140;right=146;bottom=165;font=LOGFONT(h=-14);z=6;};
+bossKeyLabel={cls="static";text="设置老板键Ctrl+(1-9)";left=75;top=120;right=250;bottom=140;font=LOGFONT(h=-14);z=5;};
+heightInput={cls="edit";text="600";left=150;top=80;right=250;bottom=100;font=LOGFONT(h=-14);z=4;};
+heightLabel={cls="static";text="设置窗口高度";left=50;top=80;right=150;bottom=100;font=LOGFONT(h=-14);z=3;};
+okButton={cls="button";text="确定";left=100;top=190;right=200;bottom=210;z=7;};
+widthInput={cls="edit";text="400";left=150;top=40;right=250;bottom=60;font=LOGFONT(h=-14);z=2;};
+widthLabel={cls="static";text="设置窗口宽度";left=50;top=40;right=150;bottom=60;font=LOGFONT(h=-14);z=1;};
+
+)
+/*}}*/
+
+var width = 0, height = 0;
+inputForm.okButton.oncommand = function() {
+    width = inputForm.widthInput.text;
+    height = inputForm.heightInput.text;
+    bossKey = inputForm.bossKeyInput.text;
+    if (width <= 0 || height <= 0) {
+        win.msgbox("请输入有效的宽度和高度！");
+    } else {
+        inputForm.close();
+    }
+}
+inputForm.show();
+win.loopMessage();
+
+//窗口2
+if (width <= 0 || height <= 0) {
+    inputForm.close(); 
+} else {
+/*DSG{{*/
+var mainForm = win.form(text="移动云手机", right=width, bottom=height);
+mainForm.add(
+custom={cls="custom", left=0, top=20, right=width, bottom=height, z=1}
+);
+/*}}*/   
+
+
+
+    
+var cachePath = "C:\Users\Lenovo\Desktop\移动云手机";
+var wb = web.view(mainForm.custom,cachePath);
+
+   
+wb.go("https://cloud.139.com/?channelSrc=02047#/cloudphone");
+
+mainForm.show();
+win.loopMessage();
+}

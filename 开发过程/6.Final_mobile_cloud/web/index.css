@@ -1,0 +1,30 @@
+body{
+    margin: 20px 10px 10px 50px; 
+}
+
+button {
+    display: inline-block;
+    outline: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    font: 11pt/100% Arial, Helvetica, sans-serif;
+    padding: 5pt 8pt;
+    text-shadow: 0 1pt 1pt rgba(0, 0, 0, .3);
+    border-radius: 4pt;  
+    box-shadow: 0 1ptt 2ptpt rgba(0, 0, 0, .2);
+    color: #d9eef7;
+    border: solid 1px #0076a3;
+    background: #0095cd; 
+}
+
+button:hover {
+    background: #007ead; 
+}
+
+.htmx-indicator{
+    display:none;
+}
+.htmx-request.htmx-indicator{
+    display:inline;
+} 

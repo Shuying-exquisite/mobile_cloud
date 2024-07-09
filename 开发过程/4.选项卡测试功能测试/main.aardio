@@ -1,0 +1,84 @@
+import win.ui;
+import web.view;
+import gdip.fontAwesome;
+/*DSG{{*/
+var winform = win.form(text="aardio form";right=400;bottom=600;bgcolor=3947580;border="none";)
+winform.add(
+custom2={cls="custom";left=49;top=42;right=402;bottom=603;bgcolor=8421376;db=1;dl=1;dr=1;dt=1;z=4;};
+plus={cls="plus";text='\uF13B';left=0;top=0;right=50;bottom=43;bgcolor=16095795;color=16777215;dl=1;dt=1;font=LOGFONT(h=-24;name='FontAwesome');z=3;};
+strip1={cls="plus";text='\uF015';left=0;top=48;right=50;bottom=142;bgcolor=3947580;clipch=1;color=16777215;dl=1;dt=1;font=LOGFONT(h=-40;name='FontAwesome');z=1;};
+strip2={cls="plus";text='\uF290';left=0;top=142;right=50;bottom=236;bgcolor=3947580;clipch=1;color=16777215;dl=1;dt=1;font=LOGFONT(h=-40;name='FontAwesome');z=2;};
+
+)
+/*}}*/
+
+//设置右上角最小化/最大化/关闭按钮图形
+import win.ui.simpleWindow;
+win.ui.simpleWindow(winform,17,47,43)
+
+//设置拖动窗体功能
+winform.wndproc = function(hwnd,message,wParam,lParam){
+        select( message ) { 
+                case 0x201/*_WM_LBUTTONDOWN*/{
+                        winform.hitCaption();
+                }
+        }
+}
+
+//创建高级选项卡
+import win.ui.tabs;
+
+//至少要添加2个创建好的选项卡(作为设计模板,创建成功后可清除)
+var tbs = win.ui.tabs(winform.strip2,winform.strip1);
+//指定选项卡的外观样式
+tbs.skin(
+     background = { 
+         disabled = 0xFF3C3C3C; 
+     }
+    color = {
+        hover = 0xFF3a9ff7; 
+    }
+    checked = {
+        color = {
+            hover = 0xFF3a9ff7; 
+            default = 0xFF3a9ff7; 
+        } 
+    } 
+)
+
+var cachePath = "C:\\Users\\Lenovo\\Desktop\\移动云手机";
+var wb = web.view(winform.custom,cachePath);
+
+//为原始按钮添加点击事件
+winform.strip1.oncommand=function(id,event){
+wb.go("http://cocfz.com/");
+
+}
+
+winform.strip2.onClick = function() {
+    wb.loadURL("http://cocfz.com/");
+}
+//动态添加更多选项卡并设置点击事件
+tbs.add({
+    text='\uf216';
+},wb._form);
+
+tbs.add({
+    text='\uf1c5';
+    onClick = function(){
+        wb.loadURL("http://example.com/link2");
+    }
+});
+
+//设置tabs选项卡默认选中项
+tbs.selIndex = 3;
+
+winform.custom2.oncommand = function(id,event){
+
+}
+
+import win.ui.shadow;
+win.ui.shadow(winform,,10);
+
+winform.show();
+win.loopMessage();
