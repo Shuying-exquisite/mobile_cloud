@@ -1,7 +1,0 @@
-﻿
-namespace appConfig{
-	isUpdate = false;
-	appRootPath = "";
-	windowIndex = 1;
-	windowShown = true;
-}

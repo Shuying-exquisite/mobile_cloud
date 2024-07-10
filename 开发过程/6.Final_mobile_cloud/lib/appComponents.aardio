@@ -1,7 +1,0 @@
-﻿
-namespace appComponents{
-	myWebView = null;
-	runTimer = null;
-	stopTimer = null;
-	myCustom = null;
-}
